@@ -3,579 +3,472 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The MGUSD Ecosystem — How MoneyGram's Stablecoin Works</title>
+<title>Your $100 on the MGUSD Network</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  :root{
+    --bg:#FAF9F7;
+    --surface:#FFFFFF;
+    --ink:#1A1A2E;
+    --ink-2:#52525E;
+    --ink-3:#8E8E9A;
+    --line:#E8E6E1;
+    --line-2:#D9D6CF;
+    --radius:16px;
+    --radius-sm:12px;
+    --shadow:0 1px 2px rgba(26,26,46,.04), 0 4px 16px rgba(26,26,46,.05);
+    --shadow-lift:0 2px 4px rgba(26,26,46,.05), 0 12px 32px rgba(26,26,46,.10);
+    /* partner palette */
+    --mg:#D6402A;     --mg-bg:#FBEDEA;   --mg-deep:#92301F;
+    --br:#6C5CE7;     --br-bg:#EFEDFD;   --br-deep:#473B9E;
+    --m0:#0E9F6E;     --m0-bg:#E4F6EE;   --m0-deep:#0A6B4B;
+    --fb:#D98E04;     --fb-bg:#FBF1DD;   --fb-deep:#8A5A03;
+    --st:#2470B3;     --st-bg:#E8F1FA;   --st-deep:#174E80;
+    --on:#0E9F6E;
+    --off:#2470B3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px 80px}
 
-  :root {
-    --primary: #1a2b4a;
-    --accent: #2563eb;
-    --accent-light: #dbeafe;
-    --success: #059669;
-    --success-light: #d1fae5;
-    --warning: #d97706;
-    --warning-light: #fef3c7;
-    --danger: #dc2626;
-    --danger-light: #fee2e2;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-500: #6b7280;
-    --gray-700: #374151;
-    --gray-900: #111827;
-    /* partner colors */
-    --mg: #b91c1c;   --mg-bg: #fee2e2;
-    --br: #5b21b6;   --br-bg: #ede9fe;
-    --m0: #065f46;   --m0-bg: #d1fae5;
-    --fb: #92400e;   --fb-bg: #fef3c7;
-    --st: #1d4ed8;   --st-bg: #dbeafe;
+  /* ---------- hero ---------- */
+  .hero{padding:72px 0 40px;text-align:center}
+  .badge{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:12px;font-weight:600;letter-spacing:.04em;
+    color:var(--mg-deep);background:var(--mg-bg);
+    border:1px solid #F2D4CC;border-radius:99px;padding:6px 14px;margin-bottom:20px;
   }
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--mg);animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+  h1{font-size:clamp(30px,5.4vw,46px);font-weight:700;letter-spacing:-.025em;line-height:1.12}
+  h1 .accent{color:var(--mg)}
+  .hero-sub{font-size:17px;color:var(--ink-2);margin:16px auto 0;max-width:560px}
+  .hero-note{font-size:13px;color:var(--ink-3);margin-top:10px}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* ---------- tabs ---------- */
+  .tabs{
+    display:flex;gap:6px;justify-content:center;margin:36px auto 0;
+    background:var(--surface);border:1px solid var(--line);border-radius:99px;
+    padding:5px;width:max-content;max-width:100%;box-shadow:var(--shadow);
+  }
+  .tab{
+    border:none;background:transparent;cursor:pointer;
+    font-size:14px;font-weight:600;color:var(--ink-2);
+    padding:10px 22px;border-radius:99px;transition:all .25s ease;
+    font-family:inherit;white-space:nowrap;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab.active-on{background:var(--on);color:#fff;box-shadow:0 2px 8px rgba(14,159,110,.35)}
+  .tab.active-off{background:var(--off);color:#fff;box-shadow:0 2px 8px rgba(36,112,179,.35)}
 
-  body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    color: var(--gray-900);
-    background: #fff;
-    line-height: 1.6;
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 40px 32px;
-  }
+  /* ---------- flow panels ---------- */
+  .panel{display:none;animation:fadeUp .45s ease}
+  .panel.show{display:block}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-  /* Header */
-  .doc-header {
-    border-bottom: 3px solid var(--primary);
-    padding-bottom: 24px;
-    margin-bottom: 40px;
+  .flow-head{
+    text-align:center;margin:40px 0 28px;
+    font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
   }
-  .doc-header .label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 8px;
+  .flow{position:relative;padding-left:0}
+  .step{
+    position:relative;display:flex;gap:18px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;margin-bottom:0;box-shadow:var(--shadow);
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
   }
-  .doc-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--primary);
-    line-height: 1.25;
-    margin-bottom: 6px;
+  .step:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+  .step-link{
+    width:2px;height:26px;margin:0 auto;border-radius:2px;
+    background:linear-gradient(var(--line-2),var(--line-2));position:relative;
   }
-  .doc-header .subtitle {
-    font-size: 15px;
-    color: var(--gray-500);
-    font-weight: 400;
+  .step-link::after{
+    content:"";position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);
+    border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--line-2);
   }
-  .meta-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    margin-top: 16px;
-    font-size: 12px;
-    color: var(--gray-500);
+  .num{
+    width:38px;height:38px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:700;
   }
-  .meta-bar span { font-weight: 500; color: var(--gray-700); }
+  .step-body{flex:1;min-width:0}
+  .who{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px}
+  .what{font-size:14.5px;color:var(--ink);line-height:1.6}
+  .plain{
+    font-size:13px;color:var(--ink-2);margin-top:10px;padding:10px 14px;
+    background:var(--bg);border-radius:10px;border-left:3px solid var(--line-2);
+  }
+  .plain b{font-weight:600;color:var(--ink-3);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:2px}
 
-  /* Section */
-  h2 {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--primary);
-    margin: 36px 0 16px;
-    padding-bottom: 6px;
-    border-bottom: 2px solid var(--gray-200);
-  }
-  h3 {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--gray-700);
-    margin: 24px 0 10px;
-  }
-  p { margin-bottom: 12px; font-size: 14px; color: var(--gray-700); }
+  /* per-actor colors */
+  .c-mg .num{background:var(--mg-bg);color:var(--mg-deep)} .c-mg .who{color:var(--mg)}
+  .c-br .num{background:var(--br-bg);color:var(--br-deep)} .c-br .who{color:var(--br)}
+  .c-m0 .num{background:var(--m0-bg);color:var(--m0-deep)} .c-m0 .who{color:var(--m0)}
+  .c-fb .num{background:var(--fb-bg);color:var(--fb-deep)} .c-fb .who{color:var(--fb-deep)}
+  .c-st .num{background:var(--st-bg);color:var(--st-deep)} .c-st .who{color:var(--st)}
 
-  /* Callout box */
-  .callout {
-    background: var(--gray-50);
-    border-left: 4px solid var(--accent);
-    padding: 16px 20px;
-    border-radius: 0 8px 8px 0;
-    margin: 20px 0;
-    font-size: 14px;
-  }
-  .callout strong { color: var(--primary); }
-  .callout.green { border-left-color: var(--success); background: #f0fdf6; }
-
-  /* Role badges */
-  .role-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 16px 0 24px;
-  }
-  .role-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 4px 12px;
-    border-radius: 20px;
-  }
-  .role-mg { background: var(--mg-bg); color: var(--mg); }
-  .role-br { background: var(--br-bg); color: var(--br); }
-  .role-m0 { background: var(--m0-bg); color: var(--m0); }
-  .role-fb { background: var(--fb-bg); color: var(--fb); }
-  .role-st { background: var(--st-bg); color: var(--st); }
-
-  /* Workflow diagram */
-  .workflow-container {
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    padding: 28px 24px;
-    margin: 20px 0 28px;
-    overflow-x: auto;
-  }
-  .workflow-title {
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--gray-500);
-    margin-bottom: 20px;
-    text-align: center;
+  .flow-tip{
+    margin-top:26px;text-align:center;font-size:14px;color:var(--ink-2);
+    background:var(--surface);border:1px dashed var(--line-2);border-radius:var(--radius-sm);
+    padding:14px 20px;
   }
 
-  /* Vertical flow */
-  .v-flow { display: flex; flex-direction: column; gap: 0; margin: 16px 0; }
-  .v-flow-step {
-    display: grid;
-    grid-template-columns: 110px 28px 1fr;
-    align-items: start;
-    min-height: 56px;
-  }
-  .v-flow-who {
-    font-size: 11px;
-    font-weight: 600;
-    text-align: right;
-    padding-right: 12px;
-    padding-top: 4px;
-  }
-  .v-flow-dot { display: flex; flex-direction: column; align-items: center; }
-  .v-flow-dot .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-  .v-flow-dot .line { width: 2px; flex: 1; min-height: 36px; background: var(--gray-200); }
-  .v-flow-card {
-    font-size: 12px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin-left: 8px;
-    margin-bottom: 8px;
-  }
-  .v-flow-card .v-title { font-weight: 600; font-size: 13px; }
-  .v-flow-card .v-detail { font-size: 11.5px; color: var(--gray-500); margin-top: 2px; line-height: 1.55; }
-  .v-flow-card .v-plain {
-    font-size: 11px; color: var(--gray-700); margin-top: 6px;
-    font-style: italic; border-top: 1px dashed rgba(0,0,0,.08); padding-top: 5px;
-  }
+  /* ---------- sections ---------- */
+  .section{margin-top:72px}
+  .sec-eyebrow{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mg);margin-bottom:8px;text-align:center}
+  .sec-title{font-size:clamp(21px,3.4vw,27px);font-weight:700;letter-spacing:-.015em;text-align:center;margin-bottom:6px}
+  .sec-sub{font-size:14px;color:var(--ink-2);text-align:center;margin-bottom:28px}
 
-  .dot-mg { background: var(--mg); }
-  .dot-br { background: #7c3aed; }
-  .dot-m0 { background: var(--success); }
-  .dot-fb { background: var(--warning); }
-  .dot-st { background: var(--accent); }
+  /* ---------- partners ---------- */
+  .partners{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  @media(max-width:760px){.partners{grid-template-columns:repeat(2,1fr)}.partners .partner:last-child{grid-column:1/-1}}
+  .partner{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 16px;cursor:pointer;text-align:left;font-family:inherit;
+    transition:all .2s ease;position:relative;
+  }
+  .partner:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+  .partner .picon{
+    width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+    margin-bottom:12px;
+  }
+  .partner .picon svg{width:20px;height:20px}
+  .partner .pname{font-size:14px;font-weight:700;color:var(--ink)}
+  .partner .prole{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:3px 0 7px}
+  .partner .pdesc{font-size:12.5px;color:var(--ink-2);line-height:1.5}
+  .partner .chev{position:absolute;top:16px;right:14px;color:var(--ink-3);font-size:12px;transition:transform .25s ease}
+  .partner.open .chev{transform:rotate(180deg)}
+  .partner.open.p-mg{border-color:var(--mg);box-shadow:0 0 0 1px var(--mg), var(--shadow-lift)}
+  .partner.open.p-br{border-color:var(--br);box-shadow:0 0 0 1px var(--br), var(--shadow-lift)}
+  .partner.open.p-m0{border-color:var(--m0);box-shadow:0 0 0 1px var(--m0), var(--shadow-lift)}
+  .partner.open.p-fb{border-color:var(--fb);box-shadow:0 0 0 1px var(--fb), var(--shadow-lift)}
+  .partner.open.p-st{border-color:var(--st);box-shadow:0 0 0 1px var(--st), var(--shadow-lift)}
 
-  .card-mg { background: #fef5f5; }
-  .card-br { background: #f5f3ff; }
-  .card-m0 { background: #ecfdf5; }
-  .card-fb { background: #fffbeb; }
-  .card-st { background: #eff6ff; }
+  .detail{
+    display:none;margin-top:14px;border-radius:var(--radius);
+    padding:20px 24px;animation:fadeUp .35s ease;border:1px solid var(--line);
+    background:var(--surface);box-shadow:var(--shadow);
+  }
+  .detail.show{display:block}
+  .detail h3{font-size:15px;font-weight:700;margin-bottom:8px}
+  .detail p{font-size:14px;color:var(--ink-2);line-height:1.65}
+  .detail .dt-tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:3px 9px;margin-bottom:10px}
 
-  .who-mg { color: var(--mg); }
-  .who-br { color: #7c3aed; }
-  .who-m0 { color: var(--success); }
-  .who-fb { color: var(--warning); }
-  .who-st { color: var(--accent); }
+  /* ---------- comparison ---------- */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:680px){.compare{grid-template-columns:1fr}}
+  .cmp{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;box-shadow:var(--shadow);
+  }
+  .cmp .lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+  .cmp .old{font-size:14px;color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--line-2);margin-bottom:4px}
+  .cmp .new{font-size:15px;font-weight:600;color:var(--ink)}
+  .cmp .new .arrow{color:var(--m0);margin-right:5px}
 
-  /* Partner accountability cards */
-  .partner-acct { display: flex; flex-direction: column; gap: 14px; margin: 20px 0; }
-  .acct-card {
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    padding: 16px 20px;
-    background: #fff;
+  /* ---------- stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:680px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 14px;text-align:center;box-shadow:var(--shadow);
   }
-  .acct-card .acct-head {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;
-  }
-  .acct-card .acct-name { font-size: 14px; font-weight: 700; color: var(--gray-900); }
-  .acct-card .acct-role {
-    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-    padding: 3px 10px; border-radius: 20px;
-  }
-  .acct-card p { font-size: 13px; margin-bottom: 0; }
-  .acct-mg { border-top: 4px solid var(--mg); }
-  .acct-br { border-top: 4px solid #7c3aed; }
-  .acct-m0 { border-top: 4px solid var(--success); }
-  .acct-fb { border-top: 4px solid var(--warning); }
-  .acct-st { border-top: 4px solid var(--accent); }
+  .stat .n{font-size:26px;font-weight:700;letter-spacing:-.02em;display:block;color:var(--ink)}
+  .stat .l{font-size:12px;color:var(--ink-2);margin-top:4px;display:block;line-height:1.4}
 
-  /* Comparison cards */
-  .timeline-compare {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin: 20px 0;
+  /* ---------- footer / sources ---------- */
+  .foot{
+    margin-top:72px;border-top:1px solid var(--line);padding-top:28px;
+    font-size:12.5px;color:var(--ink-3);line-height:1.7;
   }
-  .timeline-card {
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    padding: 20px;
-    background: #fff;
-  }
-  .timeline-card.before { border-top: 4px solid var(--danger); }
-  .timeline-card.after { border-top: 4px solid var(--success); }
-  .timeline-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--gray-700); }
-  .cmp-row { display: flex; gap: 8px; margin-bottom: 10px; font-size: 12.5px; align-items: baseline; }
-  .cmp-row .cmp-label { width: 110px; flex-shrink: 0; font-weight: 600; color: var(--gray-700); font-size: 11.5px; }
-  .cmp-row .cmp-val { color: var(--gray-500); }
-  .timeline-card.after .cmp-row .cmp-val { color: var(--gray-900); font-weight: 500; }
-
-  /* Metric cards */
-  .metrics-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin: 20px 0;
-  }
-  .metric-card {
-    text-align: center;
-    padding: 20px 16px;
-    border-radius: 10px;
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
-  }
-  .metric-card .number { font-size: 28px; font-weight: 700; color: var(--accent); }
-  .metric-card .unit { font-size: 12px; color: var(--gray-500); margin-top: 4px; font-weight: 500; }
-
-  /* Use case box */
-  .usecase-box {
-    background: linear-gradient(135deg, #f0f4ff 0%, #e8f5e9 100%);
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    padding: 24px;
-    margin: 20px 0;
-  }
-  .usecase-box h4 { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
-
-  /* Recommendation / takeaway box */
-  .recommendation-box {
-    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-    border: 1px solid #a7f3d0;
-    border-radius: 10px;
-    padding: 16px 20px;
-    margin: 20px 0;
-    font-size: 13px;
-    color: #065f46;
-  }
-  .recommendation-box strong { color: #047857; }
-
-  /* Sources */
-  .licensing-note {
-    font-size: 12px;
-    color: var(--gray-500);
-    margin: 12px 0;
-    line-height: 1.6;
-  }
-  .licensing-note strong { color: var(--gray-700); }
-  .sources-list { list-style: none; margin: 12px 0; }
-  .sources-list li { font-size: 12.5px; color: var(--gray-500); margin-bottom: 5px; }
-  .sources-list a { color: var(--accent); text-decoration: none; }
-  .sources-list a:hover { text-decoration: underline; }
-
-  /* Footer */
-  .doc-footer {
-    margin-top: 48px;
-    padding-top: 16px;
-    border-top: 1px solid var(--gray-200);
-    font-size: 11px;
-    color: var(--gray-500);
-    text-align: center;
-  }
-
-  @media (max-width: 680px) {
-    .timeline-compare { grid-template-columns: 1fr; }
-    .metrics-row { grid-template-columns: repeat(2, 1fr); }
-    .v-flow-step { grid-template-columns: 80px 28px 1fr; }
-  }
-  @media print {
-    body { padding: 20px; }
-    .workflow-container { break-inside: avoid; }
-  }
+  .foot h4{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+  .foot a{color:var(--st);text-decoration:none}
+  .foot a:hover{text-decoration:underline}
+  .foot ul{list-style:none}
+  .foot li{margin-bottom:3px}
+  .foot .disclaim{margin-top:14px;font-style:italic}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<!-- HEADER -->
-<div class="doc-header">
-  <div class="label">Ecosystem Explainer</div>
-  <h1>The MGUSD Ecosystem: Your $100 on MoneyGram's Stablecoin Network</h1>
-  <div class="subtitle">How Five Partners Move One Dollar Anywhere — On-Ramp, Off-Ramp &amp; Accountability</div>
-  <div class="meta-bar">
-    <div>Asset: <span>MGUSD — U.S. dollar stablecoin on Stellar</span></div>
-    <div>Launched: <span>June 2, 2026 (U.S. first, scaling globally)</span></div>
-    <div>Audience: <span>Leadership &amp; Product Teams</span></div>
-  </div>
-</div>
+  <!-- HERO -->
+  <header class="hero">
+    <div class="badge"><span class="dot"></span>Launched June 2, 2026 · U.S. first, scaling globally</div>
+    <h1>Your $100 on the <span class="accent">MGUSD</span> network</h1>
+    <p class="hero-sub">MoneyGram's U.S. dollar stablecoin on the Stellar blockchain — five partners working together to move one dollar anywhere.</p>
+    <p class="hero-note">MGUSD is issued by Bridge (a Stripe company), minted &amp; burned by M0's smart contracts, custodied with Fireblocks, and recorded on Stellar.</p>
 
-<!-- ROLES -->
-<div class="role-legend">
-  <span class="role-badge role-mg">MoneyGram — Distribution</span>
-  <span class="role-badge role-br">Bridge (Stripe) — Regulated Issuer</span>
-  <span class="role-badge role-m0">M0 — Smart Contracts</span>
-  <span class="role-badge role-fb">Fireblocks — Custody</span>
-  <span class="role-badge role-st">Stellar — Blockchain</span>
-</div>
+    <div class="tabs" role="tablist">
+      <button class="tab active-on" id="tab-on" role="tab" aria-selected="true" onclick="show('on')">↓ Putting money in (on-ramp)</button>
+      <button class="tab" id="tab-off" role="tab" aria-selected="false" onclick="show('off')">↑ Taking money out (off-ramp)</button>
+    </div>
+  </header>
 
-<!-- WHAT IS MGUSD -->
-<h2>What Is MGUSD</h2>
-<p>MGUSD is MoneyGram's native U.S. dollar stablecoin, launched June 2, 2026 on the Stellar blockchain — making MoneyGram the first global cash-payments network to issue its own dollar token on a public chain. It is integrated directly into the MoneyGram app as a self-custodial wallet, giving customers a stable, dollar-denominated balance they can hold and access 24/7, move globally, and convert into local currency when needed.</p>
-
-<div class="callout">
-  <strong>Core idea:</strong> A token only comes into existence when a real dollar stands behind it, and is destroyed ("burned") when that dollar is paid back out. Bridge (a Stripe company) is the regulated, GENIUS Act-ready issuer; M0's smart contracts mint and burn the tokens on Stellar; Fireblocks provides the wallet infrastructure; MoneyGram owns the customer relationship and the global cash network.
-</div>
-
-<!-- ON-RAMP -->
-<h2>On-Ramp: You Deposit $100 → 100 MGUSD in Your App</h2>
-<p>Putting money into the network — each partner plays a distinct, sequential role.</p>
-
-<div class="workflow-container">
-  <div class="workflow-title">On-Ramp Flow (Minting)</div>
-  <div class="v-flow">
-    <div class="v-flow-step">
-      <div class="v-flow-who who-mg">MoneyGram</div>
-      <div class="v-flow-dot"><div class="dot dot-mg"></div><div class="line"></div></div>
-      <div class="v-flow-card card-mg">
-        <div class="v-title">Your front door — app, identity, funding</div>
-        <div class="v-detail">You open the MoneyGram app (identity verification already done) and fund your balance. MoneyGram's network spans nearly 500,000 retail locations plus digital channels.</div>
-        <div class="v-plain">Like depositing money at your local bank branch — except the "branch network" is one of the largest cash networks on Earth.</div>
+  <!-- ON-RAMP -->
+  <section id="panel-on" class="panel show" role="tabpanel">
+    <p class="flow-head">You deposit $100 → 100 MGUSD appears in your in-app wallet</p>
+    <div class="flow">
+      <div class="step c-mg">
+        <div class="num">1</div>
+        <div class="step-body">
+          <p class="who">MoneyGram — your front door</p>
+          <p class="what">You open the MoneyGram app (identity verification already done). You fund your balance — MoneyGram's network spans nearly 500,000 retail locations plus digital channels.</p>
+          <p class="plain"><b>Plain English</b>Like depositing money at your local bank branch — except the "branch network" is one of the largest cash networks on Earth.</p>
+        </div>
+      </div>
+      <div class="step-link"></div>
+      <div class="step c-br">
+        <div class="num">2</div>
+        <div class="step-body">
+          <p class="who">Bridge (a Stripe company) — the regulated issuer</p>
+          <p class="what">Bridge is MGUSD's regulated, GENIUS Act-ready issuer. When a verified customer funds $100, Bridge authorizes the creation of 100 MGUSD. The GENIUS Act — federal stablecoin law signed July 18, 2025 — requires payment stablecoins to be backed 1:1 by dollars or other low-risk liquid assets, with monthly public reserve disclosures.</p>
+          <p class="plain"><b>Plain English</b>Think of Bridge as the mint authority: a token only comes into existence when a real dollar stands behind it. No fractional magic.</p>
+        </div>
+      </div>
+      <div class="step-link"></div>
+      <div class="step c-m0">
+        <div class="num">3</div>
+        <div class="step-body">
+          <p class="who">M0 — the smart-contract factory</p>
+          <p class="what">M0's smart-contract infrastructure executes the mint: 100 MGUSD are created on the Stellar blockchain — a permanent, tamper-evident record. M0 already powers $300M+ in on-chain supply across other stablecoin issuers.</p>
+          <p class="plain"><b>Plain English</b>Like a vending machine that only dispenses tokens when the issuer inserts the coin. Automated code, not a person with a keyboard.</p>
+        </div>
+      </div>
+      <div class="step-link"></div>
+      <div class="step c-fb">
+        <div class="num">4</div>
+        <div class="step-body">
+          <p class="who">Fireblocks — the armored vault</p>
+          <p class="what">MoneyGram holds MGUSD in institutional Fireblocks wallets, which are used to send tokens to your personal self-custodial wallet embedded in the MoneyGram app.</p>
+          <p class="plain"><b>Plain English</b>Like an armored truck moving value from the mint to your pocket. You never touch raw blockchain plumbing.</p>
+        </div>
+      </div>
+      <div class="step-link"></div>
+      <div class="step c-st">
+        <div class="num">5</div>
+        <div class="step-body">
+          <p class="who">Stellar — the public ledger</p>
+          <p class="what">Every step is recorded on Stellar, a public blockchain built for payments: ledgers close in roughly 5 seconds and network fees run fractions of a cent. Stellar has been MoneyGram's blockchain partner since 2021.</p>
+          <p class="plain"><b>Plain English</b>Like a courthouse record — anyone can verify it happened; no one can quietly rewrite it.</p>
+        </div>
       </div>
     </div>
-    <div class="v-flow-step">
-      <div class="v-flow-who who-br">Bridge (Stripe)</div>
-      <div class="v-flow-dot"><div class="dot dot-br"></div><div class="line"></div></div>
-      <div class="v-flow-card card-br">
-        <div class="v-title">The regulated issuer authorizes creation</div>
-        <div class="v-detail">Bridge is MGUSD's regulated, GENIUS Act-ready issuer. When a verified customer funds $100, Bridge authorizes the creation of 100 MGUSD. The GENIUS Act (signed July 18, 2025) requires payment stablecoins to be backed 1:1 by dollars or other low-risk liquid assets, with monthly public reserve disclosures.</div>
-        <div class="v-plain">Think of Bridge as the mint authority — a token only exists when a real dollar stands behind it. No fractional magic.</div>
+    <p class="flow-tip">💵 You now hold 100 MGUSD in a self-custodial wallet — a dollar-denominated balance you can hold and access 24/7.</p>
+  </section>
+
+  <!-- OFF-RAMP -->
+  <section id="panel-off" class="panel" role="tabpanel">
+    <p class="flow-head">You redeem 100 MGUSD → you get $100 (or local currency)</p>
+    <div class="flow">
+      <div class="step c-mg">
+        <div class="num">1</div>
+        <div class="step-body">
+          <p class="who">You — tap withdraw in the app</p>
+          <p class="what">You choose how to cash out through MoneyGram's network. Your 100 MGUSD leaves the self-custodial wallet in your app to be redeemed.</p>
+          <p class="plain"><b>Plain English</b>Like writing a check — you start it, the system handles the rest.</p>
+        </div>
+      </div>
+      <div class="step-link"></div>
+      <div class="step c-fb">
+        <div class="num">2</div>
+        <div class="step-body">
+          <p class="who">Fireblocks — receives the tokens</p>
+          <p class="what">Your MGUSD moves back into MoneyGram's institutional Fireblocks wallets — the same custody layer that distributed it — while redemption is processed.</p>
+          <p class="plain"><b>Plain English</b>Like handing tokens to the cashier's window before collecting your cash. Secure and accountable.</p>
+        </div>
+      </div>
+      <div class="step-link"></div>
+      <div class="step c-m0">
+        <div class="num">3</div>
+        <div class="step-body">
+          <p class="who">M0 — burns the tokens</p>
+          <p class="what">M0's smart-contract infrastructure burns (destroys) the redeemed MGUSD on Stellar. Total supply shrinks by exactly 100 — publicly visible on-chain.</p>
+          <p class="plain"><b>Plain English</b>Like shredding a gift card after it's spent — the digital claim disappears so the real dollar can move again.</p>
+        </div>
+      </div>
+      <div class="step-link"></div>
+      <div class="step c-br">
+        <div class="num">4</div>
+        <div class="step-body">
+          <p class="who">Bridge — settles the dollars</p>
+          <p class="what">As the issuer, Bridge stands behind every token with reserves. Once tokens are burned, the corresponding dollars are settled back for payout.</p>
+          <p class="plain"><b>Plain English</b>The locked dollar is released — because the token that represented it no longer exists.</p>
+        </div>
+      </div>
+      <div class="step-link"></div>
+      <div class="step c-mg">
+        <div class="num">5</div>
+        <div class="step-body">
+          <p class="who">MoneyGram — pays you out</p>
+          <p class="what">MoneyGram delivers your money through its global payments network — and you can convert into local currency when you need it, on your own terms.</p>
+          <p class="plain"><b>Plain English</b>A family abroad can receive local currency; the sender funded dollars. The last mile is MoneyGram's home turf.</p>
+        </div>
       </div>
     </div>
-    <div class="v-flow-step">
-      <div class="v-flow-who who-m0">M0</div>
-      <div class="v-flow-dot"><div class="dot dot-m0"></div><div class="line"></div></div>
-      <div class="v-flow-card card-m0">
-        <div class="v-title">Smart contracts execute the mint</div>
-        <div class="v-detail">M0's smart-contract infrastructure creates 100 MGUSD on the Stellar blockchain — a permanent, tamper-evident record. M0 already powers $300M+ in on-chain supply across other stablecoin issuers.</div>
-        <div class="v-plain">Like a vending machine that only dispenses tokens when the issuer inserts the coin — automated code, not a person with a keyboard.</div>
+    <p class="flow-tip">🌍 The full round trip: money in → digital dollars you control → money out through MoneyGram's global network.</p>
+  </section>
+
+  <!-- PARTNERS -->
+  <section class="section">
+    <p class="sec-eyebrow">Who does what</p>
+    <h2 class="sec-title">The five partners</h2>
+    <p class="sec-sub">Tap any card to see what each one is accountable for.</p>
+    <div class="partners">
+      <button class="partner p-mg" id="pc-mg" onclick="selectPartner('mg')">
+        <span class="chev">▾</span>
+        <div class="picon" style="background:var(--mg-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--mg-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+        <p class="pname">MoneyGram</p>
+        <p class="prole" style="color:var(--mg)">Distribution</p>
+        <p class="pdesc">The app, customer verification, and the global cash network</p>
+      </button>
+      <button class="partner p-br" id="pc-br" onclick="selectPartner('br')">
+        <span class="chev">▾</span>
+        <div class="picon" style="background:var(--br-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--br-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M9 12.5 7 21l5-3 5 3-2-8.5"/></svg></div>
+        <p class="pname">Bridge <span style="font-weight:500;color:var(--ink-3)">(Stripe)</span></p>
+        <p class="prole" style="color:var(--br)">Regulated issuer</p>
+        <p class="pdesc">GENIUS Act-ready issuer of MGUSD</p>
+      </button>
+      <button class="partner p-m0" id="pc-m0" onclick="selectPartner('m0')">
+        <span class="chev">▾</span>
+        <div class="picon" style="background:var(--m0-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--m0-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg></div>
+        <p class="pname">M0</p>
+        <p class="prole" style="color:var(--m0)">Smart contracts</p>
+        <p class="pdesc">Mints &amp; burns MGUSD on-chain</p>
+      </button>
+      <button class="partner p-fb" id="pc-fb" onclick="selectPartner('fb')">
+        <span class="chev">▾</span>
+        <div class="picon" style="background:var(--fb-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--fb-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+        <p class="pname">Fireblocks</p>
+        <p class="prole" style="color:var(--fb-deep)">Custody</p>
+        <p class="pdesc">Institutional wallet infrastructure</p>
+      </button>
+      <button class="partner p-st" id="pc-st" onclick="selectPartner('st')">
+        <span class="chev">▾</span>
+        <div class="picon" style="background:var(--st-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--st-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg></div>
+        <p class="pname">Stellar</p>
+        <p class="prole" style="color:var(--st)">Blockchain</p>
+        <p class="pdesc">Public ledger built for payments</p>
+      </button>
+    </div>
+
+    <div class="detail" id="detail-mg">
+      <span class="dt-tag" style="background:var(--mg-bg);color:var(--mg-deep)">MoneyGram · Distribution</span>
+      <h3>What are they accountable for?</h3>
+      <p>The customer experience end to end. The app, identity verification, funding, and the final payout into your hands or your recipient's. MoneyGram serves over 60 million active customers through nearly 500,000 retail locations worldwide, with more than 70% of transactions now digital. They are the face of the ecosystem — and with MGUSD, the first global cash-payments network to issue its own dollar token on a public chain.</p>
+    </div>
+    <div class="detail" id="detail-br">
+      <span class="dt-tag" style="background:var(--br-bg);color:var(--br-deep)">Bridge · Regulated issuer</span>
+      <h3>What are they accountable for?</h3>
+      <p>Issuance and regulatory integrity. Bridge — the stablecoin platform Stripe acquired for $1.1 billion in February 2025 — is MGUSD's "regulated, GENIUS Act-ready issuer." The GENIUS Act (signed July 18, 2025) is the first U.S. federal stablecoin law: it requires 100% reserve backing with dollars or other low-risk liquid assets and monthly public reserve disclosures, and restricts payment-stablecoin issuance to licensed issuers once its rules take effect. Keeping every MGUSD good for a dollar is Bridge's job.</p>
+    </div>
+    <div class="detail" id="detail-m0">
+      <span class="dt-tag" style="background:var(--m0-bg);color:var(--m0-deep)">M0 · Smart contracts</span>
+      <h3>What are they accountable for?</h3>
+      <p>The on-chain math. MGUSD tokens are minted and burned using M0's smart-contract infrastructure, deployed on Stellar at launch. When issuance is authorized, the contracts create exactly that amount — and burns destroy exactly what's redeemed, all publicly auditable. M0 is a modular stablecoin platform with more than $300 million in on-chain supply across other issuers.</p>
+    </div>
+    <div class="detail" id="detail-fb">
+      <span class="dt-tag" style="background:var(--fb-bg);color:var(--fb-deep)">Fireblocks · Custody</span>
+      <h3>What are they accountable for?</h3>
+      <p>Key security and custody. Digital tokens live in cryptographic wallets — lose the keys, lose the money. MoneyGram holds MGUSD in Fireblocks wallets, which are used to send tokens into individual customer self-custodial wallets embedded in the MoneyGram app. Fireblocks is the armored car and vault of the operation: institutional-grade wallet infrastructure between the mint and your pocket.</p>
+    </div>
+    <div class="detail" id="detail-st">
+      <span class="dt-tag" style="background:var(--st-bg);color:var(--st-deep)">Stellar · Blockchain</span>
+      <h3>What are they accountable for?</h3>
+      <p>The immutable public record. Every mint, transfer, and burn is written permanently to Stellar — a blockchain purpose-built for payments, with ~5-second ledger closes and fees of fractions of a cent. MoneyGram and the Stellar Development Foundation have partnered since 2021 on stablecoin-powered money movement; MGUSD is, in their words, "the next chapter" of that five-year partnership.</p>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="section">
+    <p class="sec-eyebrow">Why it matters</p>
+    <h2 class="sec-title">The old way vs. the MGUSD way</h2>
+    <p class="sec-sub">Typical cross-border banking rails compared with a stablecoin balance.</p>
+    <div class="compare">
+      <div class="cmp">
+        <p class="lbl">Settlement speed</p>
+        <p class="old">International wires: often 1–5 business days</p>
+        <p class="new"><span class="arrow">→</span>Stellar ledgers close in ~5 seconds</p>
+      </div>
+      <div class="cmp">
+        <p class="lbl">On-chain network cost</p>
+        <p class="old">Bank wires: commonly $25–$50 in fees</p>
+        <p class="new"><span class="arrow">→</span>Stellar network fees: fractions of a cent*</p>
+      </div>
+      <div class="cmp">
+        <p class="lbl">Availability</p>
+        <p class="old">Banking hours, weekday cutoffs</p>
+        <p class="new"><span class="arrow">→</span>Hold and access your balance 24/7</p>
+      </div>
+      <div class="cmp">
+        <p class="lbl">Who can participate</p>
+        <p class="old">Traditionally requires a bank account</p>
+        <p class="new"><span class="arrow">→</span>MoneyGram's retail network welcomes cash</p>
       </div>
     </div>
-    <div class="v-flow-step">
-      <div class="v-flow-who who-fb">Fireblocks</div>
-      <div class="v-flow-dot"><div class="dot dot-fb"></div><div class="line"></div></div>
-      <div class="v-flow-card card-fb">
-        <div class="v-title">Custody delivers tokens to your wallet</div>
-        <div class="v-detail">MoneyGram holds MGUSD in institutional Fireblocks wallets, which are used to send tokens to your personal self-custodial wallet embedded in the MoneyGram app.</div>
-        <div class="v-plain">Like an armored truck moving value from the mint to your pocket — you never touch raw blockchain plumbing.</div>
-      </div>
+    <p style="font-size:11.5px;color:var(--ink-3);margin-top:10px">*Blockchain network fees only. MoneyGram's own service fees and exchange rates apply separately and vary by service.</p>
+  </section>
+
+  <!-- STATS -->
+  <section class="section">
+    <p class="sec-eyebrow">The network behind it</p>
+    <h2 class="sec-title">MoneyGram by the numbers</h2>
+    <p class="sec-sub">As stated in the MGUSD launch announcement, June 2, 2026.</p>
+    <div class="stats">
+      <div class="stat"><span class="n">~500k</span><span class="l">retail locations (nearly half a million)</span></div>
+      <div class="stat"><span class="n">60M+</span><span class="l">active customers</span></div>
+      <div class="stat"><span class="n">70%+</span><span class="l">of transactions now digital</span></div>
+      <div class="stat"><span class="n">5 yrs</span><span class="l">of Stellar partnership (since 2021)</span></div>
     </div>
-    <div class="v-flow-step">
-      <div class="v-flow-who who-st">Stellar</div>
-      <div class="v-flow-dot"><div class="dot dot-st"></div><div class="line" style="min-height:0;"></div></div>
-      <div class="v-flow-card card-st">
-        <div class="v-title">The public ledger records everything</div>
-        <div class="v-detail">Every step is recorded on Stellar, a public blockchain built for payments: ledgers close in roughly 5 seconds and network fees run fractions of a cent. Stellar has been MoneyGram's blockchain partner since 2021.</div>
-        <div class="v-plain">Like a courthouse record — anyone can verify it happened; no one can quietly rewrite it.</div>
-      </div>
-    </div>
-  </div>
+  </section>
+
+  <!-- SOURCES -->
+  <footer class="foot">
+    <h4>Sources &amp; notes</h4>
+    <ul>
+      <li>• <a href="https://www.prnewswire.com/news-releases/moneygram-launches-mgusd-a-stablecoin-to-power-its-own-global-network-302787799.html" target="_blank" rel="noopener">MoneyGram press release — "MoneyGram Launches MGUSD" (PR Newswire, June 2, 2026)</a></li>
+      <li>• <a href="https://thedefiant.io/converge/tradfi-and-fintech/moneygram-launches-mgusd-stablecoin-on-stellar" target="_blank" rel="noopener">The Defiant — "MoneyGram Launches MGUSD Stablecoin on Stellar" (June 2, 2026)</a></li>
+      <li>• <a href="https://www.coindesk.com/business/2026/06/02/moneygram-launches-stablecoin-on-stellar-joining-rush-toward-digital-dollar-payments" target="_blank" rel="noopener">CoinDesk — "MoneyGram launches stablecoin on Stellar" (June 2, 2026)</a></li>
+      <li>• <a href="https://www.congress.gov/bill/119th-congress/senate-bill/1582" target="_blank" rel="noopener">S.1582 — GENIUS Act (signed into law July 18, 2025)</a></li>
+    </ul>
+    <p class="disclaim">The step-by-step flows above are an illustrative walkthrough of standard stablecoin mint/burn mechanics, mapped to each partner's publicly announced role. Exact operational sequencing, payout options, fees, and availability are determined by MoneyGram and its partners and may differ. MGUSD launched in the U.S. market with plans to scale globally. This page is an educational explainer, not financial advice.</p>
+  </footer>
+
 </div>
 
-<div class="callout green">
-  <strong>Result:</strong> You now hold 100 MGUSD in a self-custodial wallet — a dollar-denominated balance you can hold and access 24/7, no banking hours, no wire cutoffs.
-</div>
-
-<!-- OFF-RAMP -->
-<h2>Off-Ramp: You Redeem 100 MGUSD → $100 (or Local Currency)</h2>
-<p>Taking money out reverses the flow — tokens are burned and dollars are paid out.</p>
-
-<div class="workflow-container">
-  <div class="workflow-title">Off-Ramp Flow (Burning)</div>
-  <div class="v-flow">
-    <div class="v-flow-step">
-      <div class="v-flow-who who-mg">You / MoneyGram</div>
-      <div class="v-flow-dot"><div class="dot dot-mg"></div><div class="line"></div></div>
-      <div class="v-flow-card card-mg">
-        <div class="v-title">You tap withdraw in the app</div>
-        <div class="v-detail">You choose how to cash out through MoneyGram's network. Your 100 MGUSD leaves the self-custodial wallet in your app to be redeemed.</div>
-        <div class="v-plain">Like writing a check — you start it, the system handles the rest.</div>
-      </div>
-    </div>
-    <div class="v-flow-step">
-      <div class="v-flow-who who-fb">Fireblocks</div>
-      <div class="v-flow-dot"><div class="dot dot-fb"></div><div class="line"></div></div>
-      <div class="v-flow-card card-fb">
-        <div class="v-title">Custody receives the tokens</div>
-        <div class="v-detail">Your MGUSD moves back into MoneyGram's institutional Fireblocks wallets — the same custody layer that distributed it — while redemption is processed.</div>
-        <div class="v-plain">Like handing tokens to the cashier's window before collecting your cash.</div>
-      </div>
-    </div>
-    <div class="v-flow-step">
-      <div class="v-flow-who who-m0">M0</div>
-      <div class="v-flow-dot"><div class="dot dot-m0"></div><div class="line"></div></div>
-      <div class="v-flow-card card-m0">
-        <div class="v-title">Smart contracts burn the tokens</div>
-        <div class="v-detail">M0's smart-contract infrastructure burns (destroys) the redeemed MGUSD on Stellar. Total supply shrinks by exactly 100 — publicly visible on-chain. The burn is a new ledger entry; history is never rewritten.</div>
-        <div class="v-plain">Like shredding a gift card after it's spent — the digital claim disappears so the real dollar can move again.</div>
-      </div>
-    </div>
-    <div class="v-flow-step">
-      <div class="v-flow-who who-br">Bridge (Stripe)</div>
-      <div class="v-flow-dot"><div class="dot dot-br"></div><div class="line"></div></div>
-      <div class="v-flow-card card-br">
-        <div class="v-title">The issuer settles the dollars</div>
-        <div class="v-detail">As the issuer, Bridge stands behind every token with reserves. Once tokens are burned, the corresponding dollars are settled back for payout.</div>
-        <div class="v-plain">The locked dollar is released — because the token that represented it no longer exists.</div>
-      </div>
-    </div>
-    <div class="v-flow-step">
-      <div class="v-flow-who who-mg">MoneyGram</div>
-      <div class="v-flow-dot"><div class="dot dot-mg"></div><div class="line" style="min-height:0;"></div></div>
-      <div class="v-flow-card card-mg">
-        <div class="v-title">Pays you out — anywhere</div>
-        <div class="v-detail">MoneyGram delivers your money through its global payments network — and you can convert into local currency when you need it, on your own terms.</div>
-        <div class="v-plain">A family abroad can receive local currency; the sender funded dollars. The last mile is MoneyGram's home turf.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- PARTNERS -->
-<h2>The Five Partners &amp; Their Accountability</h2>
-<p>Each partner owns a distinct failure domain — if something goes wrong, the responsible layer is clear.</p>
-
-<div class="partner-acct">
-  <div class="acct-card acct-mg">
-    <div class="acct-head">
-      <span class="acct-name">MoneyGram</span>
-      <span class="acct-role" style="background:var(--mg-bg);color:var(--mg);">Distribution</span>
-    </div>
-    <p>The customer experience end to end — the app, identity verification, funding, and the final payout into your hands or your recipient's. MoneyGram serves over 60 million active customers through nearly 500,000 retail locations worldwide, with more than 70% of transactions now digital. With MGUSD, it is the first global cash-payments network to issue its own dollar token on a public chain.</p>
-  </div>
-  <div class="acct-card acct-br">
-    <div class="acct-head">
-      <span class="acct-name">Bridge (a Stripe company)</span>
-      <span class="acct-role" style="background:var(--br-bg);color:var(--br);">Regulated Issuer</span>
-    </div>
-    <p>Issuance and regulatory integrity. Bridge — the stablecoin platform Stripe acquired for $1.1 billion in February 2025 — is MGUSD's "regulated, GENIUS Act-ready issuer." The GENIUS Act (signed July 18, 2025) is the first U.S. federal stablecoin law: it requires 100% reserve backing with dollars or other low-risk liquid assets, monthly public reserve disclosures, and restricts payment-stablecoin issuance to licensed issuers once its rules take effect. Keeping every MGUSD good for a dollar is Bridge's job.</p>
-  </div>
-  <div class="acct-card acct-m0">
-    <div class="acct-head">
-      <span class="acct-name">M0</span>
-      <span class="acct-role" style="background:var(--m0-bg);color:var(--m0);">Smart Contracts</span>
-    </div>
-    <p>The on-chain math. MGUSD tokens are minted and burned using M0's smart-contract infrastructure, deployed on Stellar at launch. When issuance is authorized, the contracts create exactly that amount — and burns destroy exactly what's redeemed, all publicly auditable. M0 is a modular stablecoin platform with more than $300 million in on-chain supply across other issuers.</p>
-  </div>
-  <div class="acct-card acct-fb">
-    <div class="acct-head">
-      <span class="acct-name">Fireblocks</span>
-      <span class="acct-role" style="background:var(--fb-bg);color:var(--fb);">Custody</span>
-    </div>
-    <p>Key security and custody. Digital tokens live in cryptographic wallets — lose the keys, lose the money. MoneyGram holds MGUSD in Fireblocks wallets, which are used to send tokens into individual customer self-custodial wallets embedded in the MoneyGram app. Fireblocks is the armored car and vault of the operation: institutional-grade wallet infrastructure between the mint and your pocket.</p>
-  </div>
-  <div class="acct-card acct-st">
-    <div class="acct-head">
-      <span class="acct-name">Stellar</span>
-      <span class="acct-role" style="background:var(--st-bg);color:var(--st);">Blockchain</span>
-    </div>
-    <p>The immutable public record. Every mint, transfer, and burn is written permanently to Stellar — a blockchain purpose-built for payments, with ~5-second ledger closes and fees of fractions of a cent. MoneyGram and the Stellar Development Foundation have partnered since 2021 on stablecoin-powered money movement; MGUSD is, in their words, "the next chapter" of that five-year partnership.</p>
-  </div>
-</div>
-
-<!-- HOW IT FEELS TO A CUSTOMER -->
-<h2>What the Customer Sees vs. What's Underneath</h2>
-<div class="usecase-box">
-  <h4>The experience: a familiar banking-app feel — "invisible by design"</h4>
-  <p style="font-size:13px; margin-bottom:0;">A customer just sees a dollar balance and activity in the MoneyGram app. But unlike a bank's private database, the balance is a real entry on the public Stellar ledger: the app is a window onto the chain, the wallet is self-custodial (the customer's keys control the funds), and anyone can verify supply and flows on a public Stellar explorer — addresses are pseudonymous, so identity stays private with MoneyGram's KYC records.</p>
-</div>
-
-<!-- COMPARISON -->
-<h2>The Old Way vs. the MGUSD Way</h2>
-<p>Typical cross-border banking rails compared with a stablecoin balance.</p>
-
-<div class="timeline-compare">
-  <div class="timeline-card before">
-    <h4>Traditional Rails</h4>
-    <div class="cmp-row"><span class="cmp-label">Settlement</span><span class="cmp-val">International wires: often 1–5 business days</span></div>
-    <div class="cmp-row"><span class="cmp-label">Network cost</span><span class="cmp-val">Bank wires: commonly $25–$50 in fees</span></div>
-    <div class="cmp-row"><span class="cmp-label">Availability</span><span class="cmp-val">Banking hours, weekday cutoffs</span></div>
-    <div class="cmp-row"><span class="cmp-label">Access</span><span class="cmp-val">Traditionally requires a bank account</span></div>
-  </div>
-  <div class="timeline-card after">
-    <h4>MGUSD on Stellar</h4>
-    <div class="cmp-row"><span class="cmp-label">Settlement</span><span class="cmp-val">Stellar ledgers close in ~5 seconds</span></div>
-    <div class="cmp-row"><span class="cmp-label">Network cost</span><span class="cmp-val">Stellar network fees: fractions of a cent*</span></div>
-    <div class="cmp-row"><span class="cmp-label">Availability</span><span class="cmp-val">Hold and access your balance 24/7</span></div>
-    <div class="cmp-row"><span class="cmp-label">Access</span><span class="cmp-val">MoneyGram's retail network welcomes cash</span></div>
-  </div>
-</div>
-<p style="font-size:11px; color:var(--gray-500); margin-top:-8px;">*Blockchain network fees only. MoneyGram's own service fees and exchange rates apply separately and vary by service.</p>
-
-<!-- METRICS -->
-<h2>The Network Behind It</h2>
-<p>As stated in the MGUSD launch announcement, June 2, 2026.</p>
-<div class="metrics-row">
-  <div class="metric-card">
-    <div class="number">~500k</div>
-    <div class="unit">Retail locations<br>(nearly half a million)</div>
-  </div>
-  <div class="metric-card">
-    <div class="number">60M+</div>
-    <div class="unit">Active<br>customers</div>
-  </div>
-  <div class="metric-card">
-    <div class="number">70%+</div>
-    <div class="unit">Of transactions<br>now digital</div>
-  </div>
-  <div class="metric-card">
-    <div class="number">5 yrs</div>
-    <div class="unit">Stellar partnership<br>(since 2021)</div>
-  </div>
-</div>
-
-<!-- KEY TAKEAWAY -->
-<h2>Key Takeaway</h2>
-<p>MGUSD is bookkeeping made public and programmable. Dollars enter through MoneyGram's cash network, become verifiable on-chain entries via Bridge and M0, move securely through Fireblocks custody, and exit as cash or local currency anywhere MoneyGram reaches. Each partner owns one accountable layer — distribution, issuance, contract execution, custody, and the ledger itself — so the system's trust doesn't rest on any single company's word.</p>
-
-<div class="recommendation-box">
-  <strong>Why it matters:</strong> The whole flow is auditable by anyone — supply, mints, and burns are public on Stellar in real time — while customer identity stays private with MoneyGram. That combination of radical transparency of activity and pseudonymity of identity is the structural advantage over traditional rails.
-</div>
-
-<!-- SOURCES -->
-<h2>Sources &amp; Notes</h2>
-<ul class="sources-list">
-  <li>&bull; <a href="https://www.prnewswire.com/news-releases/moneygram-launches-mgusd-a-stablecoin-to-power-its-own-global-network-302787799.html" target="_blank" rel="noopener">MoneyGram press release — "MoneyGram Launches MGUSD" (PR Newswire, June 2, 2026)</a></li>
-  <li>&bull; <a href="https://thedefiant.io/converge/tradfi-and-fintech/moneygram-launches-mgusd-stablecoin-on-stellar" target="_blank" rel="noopener">The Defiant — "MoneyGram Launches MGUSD Stablecoin on Stellar" (June 2, 2026)</a></li>
-  <li>&bull; <a href="https://www.coindesk.com/business/2026/06/02/moneygram-launches-stablecoin-on-stellar-joining-rush-toward-digital-dollar-payments" target="_blank" rel="noopener">CoinDesk — "MoneyGram launches stablecoin on Stellar" (June 2, 2026)</a></li>
-  <li>&bull; <a href="https://www.congress.gov/bill/119th-congress/senate-bill/1582" target="_blank" rel="noopener">S.1582 — GENIUS Act (signed into law July 18, 2025)</a></li>
-</ul>
-<p class="licensing-note"><strong>Note:</strong> The step-by-step flows above are an illustrative walkthrough of standard stablecoin mint/burn mechanics, mapped to each partner's publicly announced role. Exact operational sequencing, payout options, fees, and availability are determined by MoneyGram and its partners and may differ. MGUSD launched in the U.S. market with plans to scale globally. This page is an educational explainer, not financial advice.</p>
-
-<div class="doc-footer">
-  Prepared June 2026 &middot; Educational explainer based on public launch announcements &middot; Not financial advice
-</div>
-
+<script>
+function show(mode){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+  document.getElementById('panel-'+mode).classList.add('show');
+  const on=document.getElementById('tab-on'), off=document.getElementById('tab-off');
+  on.classList.toggle('active-on', mode==='on');
+  off.classList.toggle('active-off', mode==='off');
+  on.setAttribute('aria-selected', mode==='on');
+  off.setAttribute('aria-selected', mode==='off');
+}
+let currentPartner=null;
+function selectPartner(id){
+  document.querySelectorAll('.partner').forEach(c=>c.classList.remove('open'));
+  document.querySelectorAll('.detail').forEach(d=>d.classList.remove('show'));
+  if(currentPartner===id){currentPartner=null;return;}
+  document.getElementById('pc-'+id).classList.add('open');
+  document.getElementById('detail-'+id).classList.add('show');
+  currentPartner=id;
+}
+// gentle reveal on scroll
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity=1;e.target.style.transform='translateY(0)';io.unobserve(e.target);}});
+},{threshold:.08});
+document.querySelectorAll('.step,.partner,.cmp,.stat').forEach(el=>{
+  el.style.opacity=0;el.style.transform='translateY(12px)';
+  el.style.transition='opacity .5s ease, transform .5s ease, box-shadow .2s ease, border-color .2s ease';
+  io.observe(el);
+});
+</script>
 </body>
 </html>
